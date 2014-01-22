@@ -16,62 +16,62 @@
 #ifndef USE_CUDA
 void computePixelNoGPU(cuDoubleComplex a, cuDoubleComplex b, unsigned short n, unsigned char* r)
 {
-	int i, j;
-	cuDoubleComplex c, z;
-	for(unsigned int x=0; x<DEFAULT_WIDTH; x++)
+        int i, j;
+        cuDoubleComplex c, z;
+        for(unsigned int x=0; x<DEFAULT_WIDTH; x++)
     {
         for(unsigned int y=0; y<DEFAULT_HEIGHT; y++)
         {
-			i = x + y * DEFAULT_WIDTH;
-			c = make_cuDoubleComplex((double)x,(double)y);
-			c = cuCadd(cuCmul(a, c), b);
+                        i = x + y * DEFAULT_WIDTH;
+                        c = make_cuDoubleComplex((double)x,(double)y);
+                        c = cuCadd(cuCmul(a, c), b);
             z = make_cuDoubleComplex(0.0,0.0);
-			for(j = 0; j < n && cuCabs(z) < 2; j++)
-			{
-				z = cuCadd(cuCmul(z, z), c);
-			}
-			if(cuCabs(z) > 2)
-			{
-				r[i*3] = j * COLOR_DEPTH / n;
-				r[i*3+1] = r[i*3];
-				r[i*3+2] = r[i*3];
-			}
-			else
-			{
-				r[i*3] = 0;
-				r[i*3+1] = 0;
-				r[i*3+2] = 0;
-			}
-	     }
+                        for(j = 0; j < n && cuCabs(z) < 2; j++)
+                        {
+                                z = cuCadd(cuCmul(z, z), c);
+                        }
+                        if(cuCabs(z) > 2)
+                        {
+                                r[i*3] = j * COLOR_DEPTH / n;
+                                r[i*3+1] = r[i*3];
+                                r[i*3+2] = r[i*3];
+                        }
+                        else
+                        {
+                                r[i*3] = 0;
+                                r[i*3+1] = 0;
+                                r[i*3+2] = 0;
+                        }
+         }
     }
 }
 #else
 __global__ void computePixel(cuDoubleComplex* a_d, cuDoubleComplex* b_d, unsigned short n, unsigned char* r_d)
 {
-	int i,j,x,y;
-	cuDoubleComplex z_d, c_d;
-	i = blockIdx.x * blockDim.x + threadIdx.x;
-	x = i % DEFAULT_WIDTH;
-	y = i / DEFAULT_WIDTH;
-	c_d = make_cuDoubleComplex((double)x,(double)y);
+        int i,j,x,y;
+        cuDoubleComplex z_d, c_d;
+        i = blockIdx.x * blockDim.x + threadIdx.x;
+        x = i % DEFAULT_WIDTH;
+        y = i / DEFAULT_WIDTH;
+        c_d = make_cuDoubleComplex((double)x,(double)y);
     c_d = cuCadd(cuCmul(a_d[0], c_d), b_d[0]);
-	z_d = make_cuDoubleComplex(0.0,0.0);
-	for(j = 0; j < n && cuCabs(z_d) < 2; j++)
-	{
-		z_d = cuCadd(cuCmul(z_d, z_d), c_d);
-	}
-	if(cuCabs(z_d) > 2)
-	{
-		r_d[i*3] = j * COLOR_DEPTH / n;
-		r_d[i*3+1] = r_d[i*3];
-		r_d[i*3+2] = r_d[i*3];
-	}
-	else
-	{
-		r_d[i*3] = 0;
-		r_d[i*3+1] = 0;
-		r_d[i*3+2] = 0;
-	}
+        z_d = make_cuDoubleComplex(0.0,0.0);
+        for(j = 0; j < n && cuCabs(z_d) < 2; j++)
+        {
+                z_d = cuCadd(cuCmul(z_d, z_d), c_d);
+        }
+        if(cuCabs(z_d) > 2)
+        {
+                r_d[i*3] = j * COLOR_DEPTH / n;
+                r_d[i*3+1] = r_d[i*3];
+                r_d[i*3+2] = r_d[i*3];
+        }
+        else
+        {
+                r_d[i*3] = 0;
+                r_d[i*3+1] = 0;
+                r_d[i*3+2] = 0;
+        }
 }
 #endif
 
@@ -89,17 +89,17 @@ int main()
 	cuDoubleComplex* a_device;
 	cuDoubleComplex* b_device;
 #endif
-	
+        
 	// starting time measure
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	
 	// zoom and rotation parameters
 	a = make_cuDoubleComplex(1.0/DEFAULT_WIDTH*3,0.0005);
     b = make_cuDoubleComplex(-1.5,-1.6);
-	
+        
 	// allocating memory on RAM
 	r = (unsigned char*) malloc(sizeof(unsigned char)*DEFAULT_WIDTH*DEFAULT_HEIGHT*3);
-	
+        
 #ifdef USE_CUDA
 	// allocating memory on GPU
     cudaMalloc((void**) &r_device, sizeof(unsigned char)*DEFAULT_WIDTH*DEFAULT_HEIGHT*3);
@@ -125,7 +125,7 @@ int main()
     FILE* file = fopen("test.data", "wb");
     if(file == NULL)
     {
-		return -1;
+                return -1;
     }
     fwrite(r, sizeof(unsigned char), DEFAULT_WIDTH*DEFAULT_HEIGHT*3, file);
     fclose(file);
